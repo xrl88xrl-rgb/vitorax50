@@ -382,11 +382,11 @@
 <div class="timer-bar">
     <div><span class="demo-badge">🔬 VERSIÓN DE DEMOSTRACIÓN</span></div>
     <div style="font-size: 11px;">⏱️ TIEMPO RESTANTE</div>
-    <div class="timer-display" id="timerDisplay">01:00</div>
+    <div class="timer-display" id="timerDisplay">00:30</div>
     <div class="progress-bar-custom">
         <div class="progress-fill-custom" id="progressFill"></div>
     </div>
-    <button class="extend-btn" onclick="extenderTiempo()">+ Extender sesión (+30s)</button>
+    <button class="extend-btn" onclick="extenderTiempo()">+ Extender sesión (+5s)</button>
     <div style="font-size: 10px; margin-top: 4px;">📞 Versión completa: +54 11 3366-9000</div>
 </div>
 
@@ -616,7 +616,7 @@
     // Datos
     let pacientes = [];
     let selectedRow = null;
-    let tiempoRestante = 60;
+    let tiempoRestante = 30;  // CAMBIADO A 30 SEGUNDOS
     let temporizadorActivo = true;
     let intervalo;
 
@@ -648,20 +648,20 @@
         document.getElementById('timerDisplay').textContent = 
             `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
         
-        let progreso = (tiempoRestante / 60) * 100;
+        let progreso = (tiempoRestante / 30) * 100;
         let fill = document.getElementById('progressFill');
         fill.style.width = progreso + '%';
         
-        if (tiempoRestante <= 10) fill.style.background = '#dc3545';
-        else if (tiempoRestante <= 20) fill.style.background = '#ffc107';
+        if (tiempoRestante <= 5) fill.style.background = '#dc3545';
+        else if (tiempoRestante <= 10) fill.style.background = '#ffc107';
         else fill.style.background = '#28a745';
     }
 
     function extenderTiempo() {
         if (temporizadorActivo) {
-            tiempoRestante += 30;
+            tiempoRestante += 5;  // CAMBIADO A 5 SEGUNDOS
             actualizarDisplay();
-            alert(`✅ Sesión extendida +30 segundos\n⏱️ Tiempo restante: ${Math.floor(tiempoRestante/60)}:${(tiempoRestante%60).toString().padStart(2,'0')}`);
+            alert(`✅ Sesión extendida +5 segundos\n⏱️ Tiempo restante: ${Math.floor(tiempoRestante/60)}:${(tiempoRestante%60).toString().padStart(2,'0')}`);
         }
     }
 
@@ -674,11 +674,11 @@
         overlay.innerHTML = `
             <div class="shutdown-card">
                 <h1>⏰ TIEMPO AGOTADO</h1>
-                <p>La sesión de prueba ha expirado después de 60 segundos.</p>
+                <p>La sesión de prueba ha expirado después de 30 segundos.</p>
                 <p>🔒 La aplicación se ha bloqueado.</p>
                 <br>
                 <p>📞 Para obtener la aplicación completamente funcional</p>
-                <p style="font-size: 22px; font-weight: bold; color: #ffc107;">+54 11 3366-9000</p>
+                <p style="font-size: 22px; font-weight: bold; color: #ffc107;">54133669</p>
                 <br>
                 <p style="font-size: 12px;">¡Gracias por su interés!</p>
                 <button class="reload-btn" onclick="location.reload()">🔄 Recargar para nueva demo</button>
