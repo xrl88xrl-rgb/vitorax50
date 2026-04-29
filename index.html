@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Morbimortalidad — Videotoracoscopia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Temporizador fijo */
+        .timer-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #0a2463, #1e3a78);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .demo-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        .timer-display {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .progress-bar-custom {
+            width: 250px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            margin: 6px auto;
+            overflow: hidden;
+        }
+
+        .progress-fill-custom {
+            height: 100%;
+            background: #28a745;
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .extend-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .extend-btn:hover {
+            background: #ffda6a;
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            margin-top: 115px;
+            padding: 20px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Grid de dos columnas */
+        .two-columns {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .left-column {
+            flex: 3;
+            min-width: 250px;
+        }
+
+        .right-column {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* Tarjetas */
+        .card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: #f0f2f6;
+            padding: 12px 16px;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            color: #0a2463;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* Grid de formulario */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        input[readonly] {
+            background: #e8e8e8;
+        }
+
+        /* Checkboxes */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 8px 0;
+        }
+
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: normal;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        /* Botones */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #0a2463;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3a78;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Resultado */
+        .result-card {
+            background: #fef9e7;
+            border: 2px solid #f0c944;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0a2463;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .badge-alta {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-baja {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Tabla */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f0f2f6;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .row-alta {
+            background: #f8d7da;
+        }
+
+        .row-baja {
+            background: #d4edda;
+        }
+
+        .counter {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Ayuda */
+        .help-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .help-title {
+            font-weight: bold;
+            color: #0a2463;
+            margin-bottom: 8px;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Overlay cierre */
+        .shutdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .shutdown-card {
+            background: #0a2463;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 450px;
+            border: 2px solid #ffc107;
+        }
+
+        .shutdown-card h1 {
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+
+        .reload-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns {
+                flex-direction: column;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-container {
+                margin-top: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Temporizador -->
+<div class="timer-bar">
+    <div><span class="demo-badge">🔬 VERSIÓN DE DEMOSTRACIÓN</span></div>
+    <div style="font-size: 11px;">⏱️ TIEMPO RESTANTE</div>
+    <div class="timer-display" id="timerDisplay">01:00</div>
+    <div class="progress-bar-custom">
+        <div class="progress-fill-custom" id="progressFill"></div>
+    </div>
+    <button class="extend-btn" onclick="extenderTiempo()">+ Extender sesión (+30s)</button>
+    <div style="font-size: 10px; margin-top: 4px;">📞 Versión completa: +54 11 3366-9000</div>
+</div>
+
+<div class="main-container">
+    <div class="two-columns">
+        <!-- COLUMNA IZQUIERDA - FORMULARIO -->
+        <div class="left-column">
+            <!-- Datos del paciente -->
+            <div class="card">
+                <div class="card-header">📋 Datos del Paciente</div>
+                <div class="card-body">
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 2;">
+                            <label>Nombre completo *</label>
+                            <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Historia Clínica N° *</label>
+                            <input type="text" id="historia" placeholder="Ej: 12345">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Clínicas -->
+            <div class="card">
+                <div class="card-header">🩺 Variables Clínicas</div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div><label>Edad *</label><input type="number" id="edad" placeholder="años"></div>
+                        <div>
+                            <label>Sexo *</label>
+                            <select id="sexo">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                            </select>
+                        </div>
+                        <div><label>Peso (kg)</label><input type="number" id="peso" step="0.1" placeholder="kg"></div>
+                        <div><label>Talla (cm)</label><input type="number" id="talla" step="0.1" placeholder="cm"></div>
+                        <div><label>IMC</label><input type="text" id="imc" readonly placeholder="Se calcula"></div>
+                        <div><label>SpO2 preop (%)</label><input type="number" id="spo2" placeholder="%"></div>
+                        <div><label>Hemoglobina (g/dL)</label><input type="number" id="hemo" step="0.1"></div>
+                        <div><label>Albúmina (g/dL)</label><input type="number" id="albumina" step="0.1"></div>
+                        <div>
+                            <label>Clase ASA *</label>
+                            <select id="asa">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="ASA I">ASA I</option>
+                                <option value="ASA II">ASA II</option>
+                                <option value="ASA III">ASA III</option>
+                                <option value="ASA IV">ASA IV</option>
+                                <option value="ASA V">ASA V</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Estado nutricional</label>
+                            <select id="nutricion">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Sobrepeso">Sobrepeso</option>
+                                <option value="Obesidad">Obesidad</option>
+                                <option value="Desnutrido">Desnutrido</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label>Hábitos tóxicos:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="tabaco"> Tabaco</label>
+                            <label><input type="checkbox" id="alcohol"> Alcohol</label>
+                            <label><input type="checkbox" id="drogas"> Drogas</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Comorbilidades:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="hta"> HTA</label>
+                            <label><input type="checkbox" id="dm"> DM</label>
+                            <label><input type="checkbox" id="epoc"> EPOC</label>
+                            <label><input type="checkbox" id="cardiopatia"> Cardiopatía</label>
+                            <label><input type="checkbox" id="nefropatia"> Nefropatía</label>
+                            <label><input type="checkbox" id="hepatopatia"> Hepatopatía</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Quirúrgicas -->
+            <div class="card">
+                <div class="card-header">🔪 Variables Quirúrgicas</div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div>
+                            <label>Tipo de proceder *</label>
+                            <select id="proceder">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Biopsia pulmonar">Biopsia pulmonar</option>
+                                <option value="Lobectomía">Lobectomía</option>
+                                <option value="Neumonectomía">Neumonectomía</option>
+                                <option value="Pleurectomía">Pleurectomía</option>
+                                <option value="Pericardiectomía">Pericardiectomía</option>
+                                <option value="Esofagectomía">Esofagectomía</option>
+                                <option value="Tumorectomía">Tumorectomía</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div><label>Tiempo quirúrgico (min)</label><input type="number" id="tiempo_qx" placeholder="min"></div>
+                        <div>
+                            <label>Conversión a toracotomía</label>
+                            <select id="conversion">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="No">No</option>
+                                <option value="Sí">Sí</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Derrame pleural</label>
+                            <select id="derrame">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="No">No</option>
+                                <option value="Leve">Leve</option>
+                                <option value="Moderado">Moderado</option>
+                                <option value="Severo">Severo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Localización</label>
+                            <select id="localizacion">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Lóbulo sup. derecho">Lóbulo sup. derecho</option>
+                                <option value="Lóbulo medio derecho">Lóbulo medio derecho</option>
+                                <option value="Lóbulo inf. derecho">Lóbulo inf. derecho</option>
+                                <option value="Lóbulo sup. izquierdo">Lóbulo sup. izquierdo</option>
+                                <option value="Lóbulo inf. izquierdo">Lóbulo inf. izquierdo</option>
+                                <option value="Bilateral">Bilateral</option>
+                                <option value="Mediastino">Mediastino</option>
+                                <option value="Pleura">Pleura</option>
+                            </select>
+                        </div>
+                        <div><label>Hemorragia intraop (mL)</label><input type="number" id="hemorragia" placeholder="mL"></div>
+                        <div>
+                            <label>Tipo de anestesia</label>
+                            <select id="anestesia">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="General">General</option>
+                                <option value="General + Epidural">General + Epidural</option>
+                                <option value="Local + Sedación">Local + Sedación</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Intubación selectiva</label>
+                            <select id="intubacion">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Sí">Sí</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Reoperación</label>
+                            <select id="reoperacion">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="No">No</option>
+                                <option value="Sí">Sí</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="calcularYGuardar()">📊 Calcular y Guardar</button>
+                <button class="btn btn-secondary" onclick="limpiarFormulario()">🗑️ Limpiar</button>
+                <button class="btn btn-danger" onclick="eliminarSeleccionado()">❌ Eliminar</button>
+            </div>
+
+            <!-- Resultado -->
+            <div id="resultadoCard" class="result-card" style="display: none;">
+                <div id="resultadoProb" class="result-value">--</div>
+                <div>Probabilidad de Morbimortalidad (%)</div>
+                <div id="resultadoBadge" class="badge"></div>
+            </div>
+
+            <!-- Tabla de pacientes -->
+            <div class="card">
+                <div class="card-header">📋 Pacientes Registrados</div>
+                <div class="card-body">
+                    <div class="table-wrapper">
+                        <table id="tablaPacientes">
+                            <thead>
+                                <tr><th>HC</th><th>Nombre</th><th>Edad</th><th>Sexo</th><th>ASA</th><th>Proceder</th><th>Prob.</th><th>Clasif.</th><th>Fecha</th></tr>
+                            </thead>
+                            <tbody id="tablaBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="contador" class="counter">Total: 0 pacientes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA - AYUDA -->
+        <div class="right-column">
+            <div class="help-card">
+                <div class="help-title">🏥 Clasificación ASA</div>
+                <div class="help-text">• ASA I: Paciente sano normal<br>• ASA II: Enfermedad sistémica leve<br>• ASA III: Enfermedad sistémica grave<br>• ASA IV: Enfermedad incapacitante<br>• ASA V: Moribundo</div>
+            </div>
+            <div class="help-card">
+                <div class="help-title">⚖️ Índice de Masa Corporal (IMC)</div>
+                <div class="help-text">Fórmula: Peso (kg) / Talla² (m²)<br><br>• &lt;18.5: Bajo peso<br>• 18.5-24.9: Normal<br>• 25-29.9: Sobrepeso<br>• ≥30: Obesidad</div>
+            </div>
+            <div class="help-card">
+                <div class="help-title">🎯 Interpretación del Resultado</div>
+                <div class="help-text">• PROBABILIDAD BAJA (&lt;68%): Riesgo bajo<br>• PROBABILIDAD ALTA (≥68%): Riesgo elevado<br>Considerar cuidados intensivos y monitoreo estrecho.</div>
+            </div>
+            <div class="help-card">
+                <div class="help-title">⚠️ Factores de mayor peso</div>
+                <div class="help-text">• Neumonectomía: +18 pts<br>• ASA IV: +16 pts<br>• Edad ≥70: +14 pts<br>• Cardiopatía: +10 pts<br>• Reoperación: +10 pts<br>• Desnutrición: +12 pts</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Datos
+    let pacientes = [];
+    let selectedRow = null;
+    let tiempoRestante = 60;
+    let temporizadorActivo = true;
+    let intervalo;
+
+    // Inicializar
+    window.onload = function() {
+        iniciarTemporizador();
+        
+        // IMC automático
+        document.getElementById('peso').addEventListener('input', calcIMC);
+        document.getElementById('talla').addEventListener('input', calcIMC);
+    };
+
+    function iniciarTemporizador() {
+        actualizarDisplay();
+        intervalo = setInterval(function() {
+            if (temporizadorActivo && tiempoRestante > 0) {
+                tiempoRestante--;
+                actualizarDisplay();
+            } else if (tiempoRestante <= 0 && temporizadorActivo) {
+                clearInterval(intervalo);
+                cerrarAplicacion();
+            }
+        }, 1000);
+    }
+
+    function actualizarDisplay() {
+        let minutos = Math.floor(tiempoRestante / 60);
+        let segundos = tiempoRestante % 60;
+        document.getElementById('timerDisplay').textContent = 
+            `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        
+        let progreso = (tiempoRestante / 60) * 100;
+        let fill = document.getElementById('progressFill');
+        fill.style.width = progreso + '%';
+        
+        if (tiempoRestante <= 10) fill.style.background = '#dc3545';
+        else if (tiempoRestante <= 20) fill.style.background = '#ffc107';
+        else fill.style.background = '#28a745';
+    }
+
+    function extenderTiempo() {
+        if (temporizadorActivo) {
+            tiempoRestante += 30;
+            actualizarDisplay();
+            alert(`✅ Sesión extendida +30 segundos\n⏱️ Tiempo restante: ${Math.floor(tiempoRestante/60)}:${(tiempoRestante%60).toString().padStart(2,'0')}`);
+        }
+    }
+
+    function cerrarAplicacion() {
+        temporizadorActivo = false;
+        clearInterval(intervalo);
+        
+        let overlay = document.createElement('div');
+        overlay.className = 'shutdown-overlay';
+        overlay.innerHTML = `
+            <div class="shutdown-card">
+                <h1>⏰ TIEMPO AGOTADO</h1>
+                <p>La sesión de prueba ha expirado después de 60 segundos.</p>
+                <p>🔒 La aplicación se ha bloqueado.</p>
+                <br>
+                <p>📞 Para obtener la aplicación completamente funcional</p>
+                <p style="font-size: 22px; font-weight: bold; color: #ffc107;">+54 11 3366-9000</p>
+                <br>
+                <p style="font-size: 12px;">¡Gracias por su interés!</p>
+                <button class="reload-btn" onclick="location.reload()">🔄 Recargar para nueva demo</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        // Deshabilitar inputs
+        document.querySelectorAll('input, select, button').forEach(el => {
+            if (el.id !== 'extendBtn') el.disabled = true;
+        });
+    }
+
+    function calcIMC() {
+        let peso = parseFloat(document.getElementById('peso').value);
+        let talla = parseFloat(document.getElementById('talla').value);
+        if (peso > 0 && talla > 0) {
+            let imc = peso / ((talla / 100) ** 2);
+            document.getElementById('imc').value = imc.toFixed(1);
+        } else {
+            document.getElementById('imc').value = '';
+        }
+    }
+
+    function calcularProbabilidad() {
+        let p = 0;
+        let edad = parseInt(document.getElementById('edad').value) || 0;
+        if (edad >= 70) p += 14;
+        else if (edad >= 60) p += 10;
+        else if (edad >= 50) p += 6;
+        else if (edad > 0) p += 2;
+        
+        if (document.getElementById('sexo').value === 'Masculino') p += 4;
+        else p += 2;
+        
+        if (document.getElementById('tabaco').checked) p += 6;
+        if (document.getElementById('alcohol').checked) p += 4;
+        if (document.getElementById('drogas').checked) p += 8;
+        if (document.getElementById('hta').checked) p += 5;
+        if (document.getElementById('dm').checked) p += 5;
+        if (document.getElementById('epoc').checked) p += 8;
+        if (document.getElementById('cardiopatia').checked) p += 10;
+        if (document.getElementById('nefropatia').checked) p += 7;
+        if (document.getElementById('hepatopatia').checked) p += 6;
+        
+        let asa = document.getElementById('asa').value;
+        let asaPts = {'ASA I':2, 'ASA II':5, 'ASA III':10, 'ASA IV':16, 'ASA V':22};
+        p += asaPts[asa] || 0;
+        
+        let nut = document.getElementById('nutricion').value;
+        let nutPts = {'Normal':0, 'Sobrepeso':3, 'Obesidad':7, 'Desnutrido':12};
+        p += nutPts[nut] || 0;
+        
+        let hemo = parseFloat(document.getElementById('hemo').value);
+        if (!isNaN(hemo)) {
+            if (hemo < 10) p += 10;
+            else if (hemo < 12) p += 5;
+        }
+        
+        let alb = parseFloat(document.getElementById('albumina').value);
+        if (!isNaN(alb)) {
+            if (alb < 2.5) p += 10;
+            else if (alb < 3.5) p += 5;
+        }
+        
+        let spo2 = parseFloat(document.getElementById('spo2').value);
+        if (!isNaN(spo2)) {
+            if (spo2 < 90) p += 10;
+            else if (spo2 < 95) p += 5;
+        }
+        
+        let proc = document.getElementById('proceder').value;
+        let procPts = {'Biopsia pulmonar':3, 'Pleurectomía':5, 'Tumorectomía':5, 'Pericardiectomía':6, 'Lobectomía':10, 'Esofagectomía':14, 'Neumonectomía':18, 'Otro':6};
+        p += procPts[proc] || 5;
+        
+        let tiempo = parseInt(document.getElementById('tiempo_qx').value) || 0;
+        if (tiempo > 240) p += 12;
+        else if (tiempo > 180) p += 8;
+        else if (tiempo > 120) p += 5;
+        else if (tiempo > 0) p += 2;
+        
+        if (document.getElementById('conversion').value === 'Sí') p += 12;
+        
+        let der = document.getElementById('derrame').value;
+        let derPts = {'No':0, 'Leve':2, 'Moderado':5, 'Severo':8};
+        p += derPts[der] || 0;
+        
+        let hem = parseFloat(document.getElementById('hemorragia').value);
+        if (!isNaN(hem)) {
+            if (hem > 1000) p += 12;
+            else if (hem > 500) p += 7;
+            else if (hem > 200) p += 3;
+        }
+        
+        let anes = document.getElementById('anestesia').value;
+        if (anes === 'Local + Sedación') p += 1;
+        else if (anes === 'General') p += 4;
+        else if (anes !== '') p += 2;
+        
+        if (document.getElementById('intubacion').value === 'No') p += 5;
+        if (document.getElementById('reoperacion').value === 'Sí') p += 10;
+        
+        let prob = Math.round((p / 190) * 100);
+        return Math.max(1, Math.min(100, prob));
+    }
+
+    function calcularYGuardar() {
+        if (!temporizadorActivo) {
+            alert('La sesión ha expirado. Recargue la página.');
+            return;
+        }
+        
+        let nombre = document.getElementById('nombre').value.trim();
+        let historia = document.getElementById('historia').value.trim();
+        let edad = document.getElementById('edad').value;
+        let sexo = document.getElementById('sexo').value;
+        let asa = document.getElementById('asa').value;
+        let proceder = document.getElementById('proceder').value;
+        
+        if (!nombre) { alert('Ingrese el nombre del paciente'); return; }
+        if (!historia) { alert('Ingrese la Historia Clínica'); return; }
+        if (!edad) { alert('Ingrese la edad'); return; }
+        if (!sexo) { alert('Seleccione el sexo'); return; }
+        if (!asa) { alert('Seleccione la clase ASA'); return; }
+        if (!proceder) { alert('Seleccione el tipo de proceder'); return; }
+        
+        let prob = calcularProbabilidad();
+        let clasif = prob >= 68 ? 'ALTA' : 'BAJA';
+        let fecha = new Date().toLocaleString();
+        
+        let paciente = {
+            historia, nombre, edad, sexo, asa, proceder,
+            probabilidad: prob, clasificacion: clasif, fecha
+        };
+        
+        pacientes.push(paciente);
+        actualizarTabla();
+        mostrarResultado(prob, clasif);
+        document.getElementById('contador').innerText = `Total: ${pacientes.length} pacientes`;
+    }
+    
+    function actualizarTabla() {
+        let tbody = document.getElementById('tablaBody');
+        tbody.innerHTML = '';
+        for (let i = 0; i < pacientes.length; i++) {
+            let p = pacientes[i];
+            let row = tbody.insertRow();
+            row.className = p.clasificacion === 'ALTA' ? 'row-alta' : 'row-baja';
+            row.onclick = (function(idx) { return function() { seleccionarFila(idx); }; })(i);
+            row.ondblclick = (function(idx) { return function() { verDetalle(idx); }; })(i);
+            row.insertCell(0).innerText = p.historia;
+            row.insertCell(1).innerText = p.nombre;
+            row.insertCell(2).innerText = p.edad;
+            row.insertCell(3).innerText = p.sexo;
+            row.insertCell(4).innerText = p.asa;
+            row.insertCell(5).innerText = p.proceder;
+            row.insertCell(6).innerText = p.probabilidad + '%';
+            row.insertCell(7).innerText = p.clasificacion;
+            row.insertCell(8).innerText = p.fecha;
+        }
+    }
+    
+    function seleccionarFila(idx) {
+        selectedRow = idx;
+        let filas = document.getElementById('tablaBody').rows;
+        for (let i = 0; i < filas.length; i++) {
+            filas[i].style.opacity = (i === idx) ? '0.6' : '1';
+        }
+    }
+    
+    function eliminarSeleccionado() {
+        if (!temporizadorActivo) { alert('Sesión expirada'); return; }
+        if (selectedRow !== null && confirm('¿Eliminar este paciente?')) {
+            pacientes.splice(selectedRow, 1);
+            selectedRow = null;
+            actualizarTabla();
+            document.getElementById('contador').innerText = `Total: ${pacientes.length} pacientes`;
+        } else {
+            alert('Seleccione un paciente de la tabla');
+        }
+    }
+    
+    function verDetalle(idx) {
+        let p = pacientes[idx];
+        alert(`═══════════════════════════\n` +
+              `PACIENTE: ${p.nombre}\n` +
+              `HC: ${p.historia}\n` +
+              `Edad: ${p.edad}\n` +
+              `Sexo: ${p.sexo}\n` +
+              `ASA: ${p.asa}\n` +
+              `Proceder: ${p.proceder}\n` +
+              `═══════════════════════════\n` +
+              `RESULTADO: ${p.probabilidad}% - ${p.clasificacion}\n` +
+              `═══════════════════════════`);
+    }
+    
+    function mostrarResultado(prob, clasif) {
+        let card = document.getElementById('resultadoCard');
+        document.getElementById('resultadoProb').innerText = prob + '%';
+        let badge = document.getElementById('resultadoBadge');
+        badge.innerText = clasif === 'ALTA' ? '⚠️ RIESGO ALTO - Cuidados intensivos ⚠️' : '✅ RIESGO BAJO - Manejo estándar ✅';
+        badge.className = 'badge ' + (clasif === 'ALTA' ? 'badge-alta' : 'badge-baja');
+        card.style.display = 'block';
+        
+        setTimeout(() => {
+            if (card.style.display !== 'none') {
+                card.style.opacity = '0.8';
+            }
+        }, 4000);
+    }
+    
+    function limpiarFormulario() {
+        if (!temporizadorActivo) { alert('Sesión expirada'); return; }
+        let inputs = ['nombre','historia','edad','peso','talla','spo2','hemo','albumina','tiempo_qx','hemorragia'];
+        inputs.forEach(id => document.getElementById(id).value = '');
+        let selects = ['sexo','asa','nutricion','proceder','conversion','derrame','localizacion','anestesia','intubacion','reoperacion'];
+        selects.forEach(id => document.getElementById(id).value = '');
+        let checks = ['tabaco','alcohol','drogas','hta','dm','epoc','cardiopatia','nefropatia','hepatopatia'];
+        checks.forEach(id => document.getElementById(id).checked = false);
+        document.getElementById('imc').value = '';
+        document.getElementById('resultadoCard').style.display = 'none';
+    }
+</script>
+</body>
+</html>
